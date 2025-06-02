@@ -2,7 +2,7 @@
 import { pizzasListProps } from "@/types/props";
 import { FC, useEffect } from "react";
 import { useProductsStore } from "@/stores/products";
-import { GridPizzas } from "./gridPizzas";
+import { GridPizzas } from "@/components/home/pizzaList/organisms/gridPizzas";
 
 export const PizzaList: FC<pizzasListProps> = ({ pizzas }: pizzasListProps) => {
   const handleAddToCart = () => {
