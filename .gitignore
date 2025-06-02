@@ -20,6 +20,13 @@
 # production
 /build
 
+# prisma generated files
+/prisma/migrations
+/prisma/schema.prisma
+/prisma/dev.db
+/prisma/dev.db-shm
+/prisma/dev.db-wal
+/src/generated/prisma
 # misc
 .DS_Store
 *.pem
