@@ -1,36 +1,210 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍕 b7pizza
 
-## Getting Started
+Bem-vindo ao **b7pizza**!  
+Um sistema completo de pizzaria online, desenvolvido com **Next.js**, **Supabase Auth (SSR)** e **Bootstrap**.  
+Aqui você encontra uma solução moderna para pedidos, autenticação segura e uma interface responsiva para clientes e administradores.
 
-First, run the development server:
+---
+<p align="center">
+   <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/Gabriel4420/b7pizza">
+
+  <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/Gabriel4420/b7pizza?logo=html">
+
+  <img alt="GitHub repo size in bytes" src="https://img.shields.io/github/repo-size/Gabriel4420/b7pizza?color=green">
+
+  <br>
+  
+  <a href="https://www.codacy.com/manual/Gabriel4420/b7pizza?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Gabriel4420/b7pizza&amp;utm_campaign=Badge_Grade">
+    <img src="https://app.codacy.com/project/badge/Grade/6dd6b46abeb14e99935a2b9ac5c6ede2"/>
+  </a>
+  
+  <img alt="GitHub code size in bytes" src="https://img.shields.io/github/last-commit/Gabriel4420/b7pizza">
+
+  <a href="https://www.linkedin.com/in/gabriel-rodrigues-perez-2069b072/">
+    <img alt="Made by Gabriel" src="https://img.shields.io/badge/made%20by-Gabriel-%2304D361">
+  </a>
+</p>
+---
+
+## 🚀 Sobre o Projeto
+
+O **b7pizza** é uma aplicação web para pizzarias que desejam gerenciar pedidos online, autenticação de usuários e administração de produtos de forma simples e eficiente.  
+O projeto foi criado para demonstrar as melhores práticas de autenticação SSR com Supabase, integração com Next.js e estilização com Bootstrap.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- ⚡ [Next.js](https://nextjs.org/) — Framework React para aplicações web modernas
+- 🔐 [Supabase Auth SSR](https://supabase.com/docs/guides/auth/server-side) — Autenticação segura com cookies e SSR
+- 🎨 [Bootstrap](https://getbootstrap.com/) — Interface responsiva e elegante
+
+---
+
+## 🔑 Autenticação com Supabase (SSR)
+
+A autenticação é feita via Supabase, utilizando Server-Side Rendering (SSR) para máxima segurança e persistência de sessão.  
+**Cookies são manipulados apenas com os métodos recomendados para evitar problemas de sessão.**
+
+---
+
+## ⚙️ Como Configurar
+
+### 1️⃣ Instale as dependências
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install @supabase/supabase-js @supabase/ssr
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2️⃣ Configure as variáveis de ambiente
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Crie um arquivo `.env.local` na raiz do projeto:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🧩 Utilitários Supabase
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 🌐 Cliente Browser
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```typescript
+import { createBrowserClient } from '@supabase/ssr'
 
-## Deploy on Vercel
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 🖥️ Cliente Server
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```typescript
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+export async function createClient() {
+  const cookieStore = await cookies()
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // Ignorar em Server Component
+          }
+        },
+      },
+    }
+  )
+}
+```
+
+---
+
+## 🛡️ Middleware para Refresh de Sessão
+
+```typescript
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (
+    !user &&
+    !request.nextUrl.pathname.startsWith('/login') &&
+    !request.nextUrl.pathname.startsWith('/auth')
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+
+  return supabaseResponse
+}
+
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}
+```
+
+---
+
+## ▶️ Como rodar o projeto
+
+```bash
+npm install
+npm run dev
+```
+
+Acesse [http://localhost:3000](http://localhost:3000) no seu navegador para ver o sistema em funcionamento.
+
+---
+
+## 👨‍💻 Autor
+
+<h4 align="center">
+  Feito com ❤️ por Gabriel Rodrigues 👋️ <a href="mailto:gabriel_rodrigues_perez@hotmail.com">Entre em contato!</a>
+</h4>
+
+<p align="center">
+
+  <a href="https://www.linkedin.com/in/gabriel-rodrigues-perez-2069b072/">
+    <img alt="Gabriel Rodrigues Perez" src="https://img.shields.io/badge/LinkedIn-Gabriel_Rodrigues-0e76a8?style=flat&logoColor=white&logo=linkedin">
+  </a>
+  <a href="https://www.facebook.com/gabriel.rodrigues.perez">
+    <img alt="Gabriel Rodrigues Perez" src="https://img.shields.io/badge/Facebook-Gabriel_Rodrigues-1778F2?style=flat&logoColor=white&logo=facebook">
+  </a>
+  <a href="https://www.instagram.com/gabriel_rodrigues_perez/">
+    <img alt="Gabriel Rodrigues Perez" src="https://img.shields.io/badge/Instagram-@gabriel4420-833AB4?style=flat&logoColor=white&logo=instagram">
+  </a>
+  
+</p>
+
+---
+
+🍕 **b7pizza** — Sua pizzaria online, simples e moderna!
