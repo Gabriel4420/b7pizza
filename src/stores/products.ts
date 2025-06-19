@@ -1,12 +1,14 @@
-import { Product } from "@/generated/prisma";
+import { ProductStore } from "@/types/stores";
 import { create } from "zustand";
 
-type Store = {
-  products: Array<Product>;
-  setProducts: (product: Product[]) => void;
-};
-
-export const useProductsStore = create<Store>((set) => ({
+export const useProductsStore = create<ProductStore>()((set) => ({
   products: [],
-  setProducts: (products) => set({ products }),
+  // ✅ Correção: comparar se os produtos são diferentes antes de atualizar
+  setProducts: (products) =>
+    set((state) => {
+      if (JSON.stringify(state.products) === JSON.stringify(products)) {
+        return state;
+      }
+      return { products };
+    }),
 }));
