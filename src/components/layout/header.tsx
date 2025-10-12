@@ -1,11 +1,10 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { useCart } from "@/stores/cart";
+import { cookies } from "next/headers";
 import Link from "next/link";
+import { LoginAreaButton } from "../login/button/login-button";
+import { CartHeaderButton } from "../cart/button";
 
-export const Header = () => {
-  const cart = useCart();
+export const Header = async () => {
+  const cookieStore = await cookies();
 
   return (
     <header className="container mx-auto my-4 flex items-center justify-between p-5 bg-secondary rounded-md">
@@ -13,14 +12,10 @@ export const Header = () => {
         <h2 className="text-2xl font-bold">B7Pizzas</h2>
       </Link>
       <div className="flex gap-2">
-        <Button>Login/Cadastro</Button>
-
-        <Button className="relative" onClick={() => cart.setOpenCart(true)}>
-          <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
-            2
-          </span>
-          Carrinho
-        </Button>
+        <LoginAreaButton
+          initialState={cookieStore.get("token") ? true : false}
+        />
+        <CartHeaderButton />
       </div>
     </header>
   );
