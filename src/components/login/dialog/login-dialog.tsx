@@ -1,7 +1,12 @@
 "use client";
 
 import { useAuth } from "@/stores/auth";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../ui/dialog";
 import { useEffect, useState } from "react";
 import { LoginAreaStep } from "@/types/auth";
 import { Input } from "../../ui/input";
@@ -14,28 +19,24 @@ export const LoginAreaDialog = () => {
 
   const [step, setStep] = useState<LoginAreaStep>("EMAIL");
 
-  const [email, setEmail] = useState("");
+  const [emailField, setEmailField] = useState("");
 
   const handleStepEmail = (email: string, hasEmail: boolean) => {
-    setEmail(email);
-    if (hasEmail) {
-      setStep("SIGN_IN");
-    } else {
-      setStep("SIGN_UP");
-    }
+    setEmailField(email);
+    return hasEmail ? setStep("SIGN_IN") : setStep("SIGN_UP");
   };
 
   return (
     <Dialog open={auth.open} onOpenChange={(open) => auth.setOpen(open)}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="flex justify-evenly items-center gap-2">
-            Login / Cadastro
+          <DialogTitle className="flex justify-center items-center text-sm -mt-3.5 mb-5 gap-16 pr-32">
             {step === "EMAIL" ? (
               <Button
                 variant={"ghost"}
                 size={"icon"}
                 onClick={() => setStep("EMAIL")}
+                className="text-2xl font-bold mr-6"
               >
                 <ArrowLeftIcon className="size-4" />
               </Button>
@@ -56,6 +57,7 @@ export const LoginAreaDialog = () => {
                 <ArrowLeftIcon className="size-4" />
               </Button>
             )}
+            Login / Cadastro
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4">

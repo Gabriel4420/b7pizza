@@ -10,3 +10,7 @@ export type LoginAreaButtonAttributes = {
 };
 
 export type LoginAreaStep = "EMAIL" | "SIGN_IN" | "SIGN_UP";
+
+export type AttribuitesStepEmail = {
+  onValidate: (email: string, hasEmail: boolean) => void;
+};
