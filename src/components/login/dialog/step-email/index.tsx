@@ -6,17 +6,19 @@ import { api } from "@/lib/axios";
 import { AttribuitesStepEmail } from "@/types/auth";
 import { LoginStepEmailSchema } from "@/types/schemasZod";
 import { ChangeEvent, useState } from "react";
+import { useToast } from "@/components/ui/toast";
 
 export const StepEmail = ({ onValidate }: AttribuitesStepEmail) => {
   const [errors, setErrors] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [emailField, setEmailField] = useState<string>("");
+  const { show } = useToast();
   const handleSubmit = async () => {
     setErrors(null);
     const validData = LoginStepEmailSchema.safeParse({ email: emailField });
     if (!validData.success) {
       setErrors(validData.error.flatten().fieldErrors);
-      return;
+      return false;
     }
 
     try {
@@ -28,6 +30,15 @@ export const StepEmail = ({ onValidate }: AttribuitesStepEmail) => {
       onValidate(validData.data.email, emailReq.data.exists ? true : false);
     } catch (error) {
       setLoading(false);
+      const status = (error as any)?.response?.status;
+      const message = (error as any)?.response?.data?.message || "Falha ao validar e-mail";
+      if (status === 409) {
+        show({ title: "Conflito", message, variant: "warning" });
+      } else if (status === 400) {
+        show({ title: "Requisição inválida", message, variant: "error" });
+      } else {
+        show({ title: "Erro", message, variant: "error" });
+      }
     }
   };
 

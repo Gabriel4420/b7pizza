@@ -208,3 +208,28 @@ Acesse [http://localhost:3000](http://localhost:3000) no seu navegador para ver 
 ---
 
 🍕 **b7pizza** — Sua pizzaria online, simples e moderna!
+### Endpoint: `POST /api/auth/validate_email`
+
+- Objetivo: verificar se um e-mail já está cadastrado.
+- Request Body: `{ email: string }`
+- Query Param opcional `mode`:
+  - `detect` (padrão): sempre retorna `200` com `{ exists: boolean, message }`.
+  - `signup`: retorna `409` se o e-mail já existe (conflito ao cadastrar).
+  - `signin`: retorna `409` se o e-mail não existe (conflito ao autenticar).
+
+Exemplos de Resposta:
+
+```
+// 200
+{ "exists": true, "message": "E-mail cadastrado" }
+
+// 409 (signup)
+{ "exists": true, "message": "E-mail já cadastrado" }
+
+// 409 (signin)
+{ "exists": false, "message": "E-mail não encontrado" }
+```
+
+Notas de Implementação:
+- Adicionada validação de payload com `zod` e logs de servidor para facilitar diagnóstico.
+- Melhorado o tratamento de erros no cliente (toast) para exibir mensagens claras.
